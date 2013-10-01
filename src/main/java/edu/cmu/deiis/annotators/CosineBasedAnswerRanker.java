@@ -44,7 +44,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 	double totalScore = 0.0;
 	double documentCount = 0;
 
-	Class neClazz = NamedEntityMention.class;
+	Class neClazz = EntityMention.class;
 
 	@Override
 	public void initialize(UimaContext aContext)
@@ -71,6 +71,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 				question, Token.class);
 		Map<String, Integer> questionNeCounts = getCoveredTypeCounts(question,
 				neClazz);
+		Map<String, Integer> questionLemmaCounts = getLemmaPosCounts(question);
 		Table<Integer, String, Integer> questionNGramCounts = getNgramCounts(question);
 		Map<Integer, Map<String, Integer>> questionNGramRows = questionNGramCounts
 				.rowMap();
@@ -80,12 +81,15 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 					answer, Token.class);
 			Map<String, Integer> answerNeCounts = getCoveredTypeCounts(answer,
 					neClazz);
+			Map<String, Integer> answerLemmaCounts = getLemmaPosCounts(question);
 
 			double totalScore = 0;
 
 			double tokenScore = getCosine(questionTokenCounts,
 					answerTokenCounts);
 			double neScore = getCosine(questionNeCounts, answerNeCounts);
+			double lemmaScore = getCosine(questionLemmaCounts,
+					answerLemmaCounts);
 
 			totalScore += (tokenScore * 0.5 + neScore * 0.3);
 
@@ -200,6 +204,38 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 			}
 		}
 		return annotationCounts;
+	}
+
+	/**
+	 * Get the bag of annotation with frequency that is covered by the given
+	 * annotation
+	 * 
+	 * @param annotation
+	 *            The given annotation which indicates the range of the covered
+	 *            types
+	 * @param clazz
+	 *            The class of the covered type to be counted
+	 * @return The counted covered type annotation String with frequency.
+	 */
+	private <A extends Annotation> Map<String, Integer> getLemmaPosCounts(
+			A annotation) {
+		Map<String, Integer> lemmaCounts = new HashMap<String, Integer>();
+		for (Token token : JCasUtil.selectCovered(Token.class, annotation)) {
+			String text = token.getLemma();
+			// don't count punctuations
+			if (Pattern.matches("\\p{Punct}", text)) {
+				continue;
+			}
+
+			text += ("_" + token.getPos());
+
+			if (lemmaCounts.containsKey(text)) {
+				lemmaCounts.put(text, lemmaCounts.get(token) + 1);
+			} else {
+				lemmaCounts.put(text, 1);
+			}
+		}
+		return lemmaCounts;
 	}
 
 	/**
