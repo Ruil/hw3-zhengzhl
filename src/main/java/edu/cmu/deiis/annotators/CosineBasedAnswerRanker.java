@@ -14,6 +14,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.cleartk.ne.type.NamedEntityMention;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -43,6 +44,8 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 	double totalScore = 0.0;
 	double documentCount = 0;
 
+	Class neClazz = NamedEntityMention.class;
+
 	@Override
 	public void initialize(UimaContext aContext)
 			throws ResourceInitializationException {
@@ -67,7 +70,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 		Map<String, Integer> questionTokenCounts = getCoveredTypeCounts(
 				question, Token.class);
 		Map<String, Integer> questionNeCounts = getCoveredTypeCounts(question,
-				EntityMention.class);
+				neClazz);
 		Table<Integer, String, Integer> questionNGramCounts = getNgramCounts(question);
 		Map<Integer, Map<String, Integer>> questionNGramRows = questionNGramCounts
 				.rowMap();
@@ -76,7 +79,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 			Map<String, Integer> answerTokenCounts = getCoveredTypeCounts(
 					answer, Token.class);
 			Map<String, Integer> answerNeCounts = getCoveredTypeCounts(answer,
-					EntityMention.class);
+					neClazz);
 
 			double totalScore = 0;
 
