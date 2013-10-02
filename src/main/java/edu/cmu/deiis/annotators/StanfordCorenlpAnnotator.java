@@ -5,9 +5,11 @@ package edu.cmu.deiis.annotators;
 
 import java.util.Properties;
 
+import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.resource.ResourceInitializationException;
 
 import edu.cmu.deiis.types.EntityMention;
 import edu.cmu.deiis.types.Sentence;
@@ -34,6 +36,19 @@ import edu.stanford.nlp.util.CoreMap;
  */
 public class StanfordCorenlpAnnotator extends JCasAnnotator_ImplBase {
 
+	private StanfordCoreNLP pipeline;
+
+	public void initialize(UimaContext aContext)
+			throws ResourceInitializationException {
+		super.initialize(aContext);
+
+		Properties props = new Properties();
+		props.put("annotators", "tokenize, ssplit, pos, lemma,ner");
+		// props.put("annotators", "tokenize");
+
+		pipeline = new StanfordCoreNLP(props);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -44,11 +59,6 @@ public class StanfordCorenlpAnnotator extends JCasAnnotator_ImplBase {
 	@Override
 	public void process(JCas aJCas) throws AnalysisEngineProcessException {
 		String documentText = aJCas.getDocumentText();
-		Properties props = new Properties();
-		props.put("annotators", "tokenize, ssplit, pos, lemma, ner");
-		// props.put("annotators", "tokenize");
-
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
 		Annotation document = new Annotation(documentText);
 		pipeline.annotate(document);

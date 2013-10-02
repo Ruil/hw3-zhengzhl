@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
@@ -44,7 +45,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 	double totalScore = 0.0;
 	double documentCount = 0;
 
-	Class neClazz = EntityMention.class;
+	Class neClazz = NamedEntityMention.class;
 
 	@Override
 	public void initialize(UimaContext aContext)
@@ -81,17 +82,20 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 					answer, Token.class);
 			Map<String, Integer> answerNeCounts = getCoveredTypeCounts(answer,
 					neClazz);
+
 			Map<String, Integer> answerLemmaCounts = getLemmaPosCounts(question);
 
 			double totalScore = 0;
 
 			double tokenScore = getCosine(questionTokenCounts,
 					answerTokenCounts);
+
 			double neScore = getCosine(questionNeCounts, answerNeCounts);
+
 			double lemmaScore = getCosine(questionLemmaCounts,
 					answerLemmaCounts);
 
-			totalScore += (tokenScore * 0.5 + neScore * 0.3);
+			totalScore += (tokenScore * 0.4 + neScore * 0.3 + lemmaScore * 0.1);
 
 			Table<Integer, String, Integer> answerNGramCounts = getNgramCounts(answer);
 
@@ -188,7 +192,7 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 	 *            The class of the covered type to be counted
 	 * @return The counted covered type annotation String with frequency.
 	 */
-	private <A extends Annotation, T extends Annotation> Map<String, Integer> getCoveredTypeCounts(
+	private <A extends Annotation, T extends AnnotationFS> Map<String, Integer> getCoveredTypeCounts(
 			A annotation, Class<T> clazz) {
 		Map<String, Integer> annotationCounts = new HashMap<String, Integer>();
 		for (T token : JCasUtil.selectCovered(clazz, annotation)) {
@@ -265,5 +269,14 @@ public class CosineBasedAnswerRanker extends JCasAnnotator_ImplBase {
 		}
 
 		return ngramCounts;
+	}
+
+	private void ppCountingMap(Map<String, Integer> countingMap) {
+		System.out.println("#########");
+		for (Entry<String, Integer> entry : countingMap.entrySet()) {
+			System.out.println(String.format("key : %s , count : %d",
+					entry.getKey(), entry.getValue()));
+		}
+		System.out.println("#########");
 	}
 }

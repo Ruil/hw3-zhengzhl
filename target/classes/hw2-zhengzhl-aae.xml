@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
   <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
   <primitive>false</primitive>
@@ -6,14 +7,14 @@
     <delegateAnalysisEngine key="TestElementAnnotatorDescriptor">
       <import name="edu.cmu.deiis.anntators.TestElementAnnotatorDescriptor"/>
     </delegateAnalysisEngine>
-    <delegateAnalysisEngine key="StanfordCorenlpAnnotatorDescriptor">
-      <import name="edu.cmu.deiis.anntators.StanfordCorenlpAnnotatorDescriptor"/>
-    </delegateAnalysisEngine>
     <delegateAnalysisEngine key="NGramDescriptor">
       <import name="edu.cmu.deiis.anntators.NGramDescriptor"/>
     </delegateAnalysisEngine>
     <delegateAnalysisEngine key="CosineRankerDescriptor">
       <import name="edu.cmu.deiis.anntators.CosineRankerDescriptor"/>
+    </delegateAnalysisEngine>
+    <delegateAnalysisEngine key="StanfordCorenlpAnnotatorDescriptor">
+      <import name="edu.cmu.deiis.anntators.StanfordCorenlpAnnotatorDescriptor"/>
     </delegateAnalysisEngine>
   </delegateAnalysisEngineSpecifiers>
   <analysisEngineMetaData>
